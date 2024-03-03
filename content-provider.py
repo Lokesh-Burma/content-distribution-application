@@ -1,3 +1,18 @@
+"""
+content_provider.py
+
+This module provides functionality for generating text files with 
+provided content and getting basic file info.
+
+The main() function takes a file name and content as command line args,
+generates a text file with the provided name and content in a 
+"content-provider" folder, and prints the file name and size.
+
+The key functions are:
+
+- generate_text_file(): Writes content to a text file.
+- get_file_info(): Gets the name and size of a file.
+"""
 # content_provider.py
 import os
 import sys

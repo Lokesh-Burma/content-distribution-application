@@ -1,3 +1,15 @@
+"""
+client.py - Client for requesting and receiving files from a server
+
+This module contains functions for connecting to a server, requesting a file 
+by name, receiving the file contents over a socket, and saving the file locally.
+
+request_file() handles connecting to the server, sending the request, and calling 
+receive_file() to save the file after validating the response.
+
+receive_file() handles receiving the file contents over the socket in chunks 
+and writing them to a local file.
+"""
 # client.py
 import os
 import socket

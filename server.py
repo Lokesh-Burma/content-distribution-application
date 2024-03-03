@@ -1,3 +1,9 @@
+"""
+server.py handles client requests for files by first checking if the 
+file exists locally. If not, it forwards the request to other servers
+defined in other_systems. If found on another server, it saves the file
+locally and returns the content to the client.
+"""
 # server.py
 import os
 import socket
