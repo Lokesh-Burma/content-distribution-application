@@ -10,9 +10,9 @@ import socket
 import json
 
 other_systems = [
-    ("172.31.8.60", 12345),
-    ("172.31.6.92", 12345),
-    ("172.31.2.235", 12345)
+    ("172.31.7.185", 12345),
+    ("172.31.3.78", 12345),
+    ("172.31.7.130", 12345)
 ]
 
 
@@ -59,11 +59,13 @@ def handle_client_request(client_socket, data, current_system_ip):
                         other_socket.close()
                         return
                     else:
-                        data['file_not_found_in_ip'].append((ip, port))
+                        print(
+                            f"Failed to retrieve file from the node: {ip}:{port}")
+                        data['file_not_found_in_ip'].append(ip)
                 except Exception as e:
                     print(
                         f"Failed to retrieve file from the node: {ip}:{port}: {e}")
-                    data['file_not_found_in_ip'].append((ip, port))
+                    data['file_not_found_in_ip'].append(ip)
 
         client_socket.send("File not found.".encode())
 
