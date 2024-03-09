@@ -7,8 +7,8 @@ locally and returns the content to the client.
 # server.py
 import os
 import socket
+import json
 
-# Define the IP address and port of the other systems running the server.py script
 other_systems = [
     ("172.31.8.60", 12345),
     ("172.31.6.92", 12345),
@@ -21,57 +21,56 @@ def save_file(file_name, file_content):
         file.write(file_content)
 
 
-def handle_client_request(client_socket, file_name, server_info):
-    folder_name = "/home/labuser/Desktop/content-provider/"
-    file_path = os.path.join(folder_name, file_name)
+def handle_client_request(client_socket, data, current_system_ip):
+    folder_name = "content-provider"
+    file_path = os.path.join(folder_name, data['file_name'])
 
     try:
         with open(file_path, 'r') as file:
             file_content = file.read()
-            file_content_with_info = f"File content from server {server_info}:\n{file_content}"
-            client_socket.send(file_content_with_info.encode())
+            client_socket.send(
+                f"File content from server {current_system_ip}:\n{file_content}".encode())
+            return  # Exit the function after sending the file content
     except FileNotFoundError:
-        print(
-            f"Failed to retrieve file from current node")
-        # Forward the file request to other systems if not found locally
-        current_system_ip = socket.gethostbyname(socket.gethostname())
-        for system_ip, system_port in other_systems:
-            if system_ip != current_system_ip:  # Check if the IP address is not equal to the current server's IP address
+        print(f"Failed to retrieve file from current node")
+
+        data['file_not_found_in_ip'].append(current_system_ip)
+
+        for ip, port in other_systems:
+            if ip != current_system_ip and ip not in data['file_not_found_in_ip']:
                 try:
-                    print(
-                        f"Trying to connect to another node: {system_ip}:{system_port}")
-                    other_server_socket = socket.socket(
+                    print(f"Trying to connect to another node: {ip}:{port}")
+                    other_socket = socket.socket(
                         socket.AF_INET, socket.SOCK_STREAM)
-                    other_server_socket.connect((system_ip, system_port))
-                    print(
-                        f"Connection successfull to the node: {system_ip}:{system_port}")
-                    other_server_socket.send(file_name.encode())
-                    print(
-                        f"Initiating search on the node: {system_ip}:{system_port}")
-                    file_content = other_server_socket.recv(1024).decode()
-                    file_content_with_info = f"File content received from server: {system_ip}:\n{system_port}"
-                    client_socket.send(file_content_with_info.encode())
-                    print(
-                        f"File content received from the node: {system_ip}:{system_port}")
-                    # Save the file received from other system locally
-                    save_file(file_path, file_content)
-                    print(
-                        f"File saved locally: {file_path}")
-                    other_server_socket.close()
-                    return
+                    other_socket.connect((ip, port))
+                    print(f"Connection successfull to the node: {ip}:{port}")
+                    json_data = json.dumps(data)
+                    other_socket.send(json_data.encode())
+                    print(f"Initiating search on the node: {ip}:{port}")
+                    response = other_socket.recv(1024).decode()
+                    if ":\n" in response:
+                        info, content = response.split(":\n", 1)
+                        print("Received :", info)
+                        client_socket.send(response.encode())
+                        print(
+                            f"File content received from the node: {ip}:{port}")
+                        save_file(file_path, content)
+                        print(f"File saved locally: {file_path}")
+                        other_socket.close()
+                        return
+                    else:
+                        data['file_not_found_in_ip'].append((ip, port))
                 except Exception as e:
                     print(
-                        f"Failed to retrieve file from the node: {system_ip}:{system_port}: {e}")
+                        f"Failed to retrieve file from the node: {ip}:{port}: {e}")
+                    data['file_not_found_in_ip'].append((ip, port))
 
         client_socket.send("File not found.".encode())
 
 
-# Example usage:
 if __name__ == "__main__":
     host = socket.gethostbyname(socket.gethostname())
     port = 12345
-
-    server_info = f"{host}:{port}"  # Server information for identification
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((host, port))
@@ -82,7 +81,9 @@ if __name__ == "__main__":
         client_socket, client_address = server_socket.accept()
         print("Connection successfull from node: ", client_address)
 
-        file_name = client_socket.recv(1024).decode()
-        handle_client_request(client_socket, file_name, server_info)
+        data = client_socket.recv(1024).decode()
+        data = json.loads(data)
+        print("Received :", data)
+        handle_client_request(client_socket, data, host)
 
         client_socket.close()
