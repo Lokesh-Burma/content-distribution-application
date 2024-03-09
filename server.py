@@ -22,7 +22,7 @@ def save_file(file_name, file_content):
 
 
 def handle_client_request(client_socket, file_name, server_info):
-    folder_name = "content-provider"
+    folder_name = "/home/labuser/Desktop/content-provider/"
     file_path = os.path.join(folder_name, file_name)
 
     try:
