@@ -63,4 +63,4 @@ if __name__ == "__main__":
     file_name = input("Enter the file name to search: ")
     print(
         f"Initiating search on the current node: {host}:{port}")
-    request_file(host, port, 'example.txt')
+    request_file(host, port, file_name)
