@@ -62,7 +62,7 @@ if __name__ == "__main__":
 
     while True:
         client_socket, client_address = server_socket.accept()
-        print("Connection from", client_address)
+        print("Connection successfull from", client_address)
 
         file_name = client_socket.recv(1024).decode()
         handle_client_request(client_socket, file_name, server_info)
