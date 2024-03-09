@@ -45,7 +45,7 @@ def request_file(host, port, file_name):
 
     client_socket.send(file_name.encode())
     initial_data = client_socket.recv(1024).decode()
-    print(initial_data)
+    # print(initial_data)
 
     if initial_data.startswith("File content"):
         receive_file(client_socket, initial_data, file_name)
@@ -61,5 +61,6 @@ if __name__ == "__main__":
     port = 12345
 
     file_name = input("Enter the file name to search: ")
-
+    print(
+        f"Initiating search on the current node: {host}:{port}")
     request_file(host, port, 'example.txt')
