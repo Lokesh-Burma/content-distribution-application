@@ -15,7 +15,7 @@ import os
 import socket
 
 
-def receive_file(client_socket, file_name):
+def receive_file(client_socket, initial_data, file_name):
     folder_name = "content-received"
     if not os.path.exists(folder_name):
         os.makedirs(folder_name)
@@ -23,6 +23,13 @@ def receive_file(client_socket, file_name):
     file_path = os.path.join(folder_name, file_name)
 
     with open(file_path, 'wb') as file:
+        if ":\n" in initial_data:
+            server_info, file_content = initial_data.split(":\n", 1)
+            print("Received :", server_info)
+            file.write(file_content.encode())
+        else:
+            print(initial_data)  # Print error message or file not found message
+
         while True:
             file_data = client_socket.recv(1024)
             if not file_data:
@@ -37,21 +44,23 @@ def request_file(host, port, file_name):
     client_socket.connect((host, port))
 
     client_socket.send(file_name.encode())
-    response = client_socket.recv(1024).decode()
+    initial_data = client_socket.recv(1024).decode()
+    # print(initial_data)
 
-    if response.startswith("File content"):
-        receive_file(client_socket, file_name)
+    if initial_data.startswith("File content"):
+        receive_file(client_socket, initial_data, file_name)
     else:
-        print("Error:", response)
+        print("Error:", initial_data)
 
     client_socket.close()
 
 
 # Example usage:
 if __name__ == "__main__":
-    host = 'localhost'
+    host = socket.gethostbyname(socket.gethostname())
     port = 12345
 
     file_name = input("Enter the file name to search: ")
-
-    request_file(host, port, file_name)
+    print(
+        f"Initiating search on the current node: {host}:{port}")
+    request_file(host, port, 'example.txt')

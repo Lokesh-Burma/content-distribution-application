@@ -37,7 +37,7 @@ def main():
     file_name = sys.argv[1]
     file_content = sys.argv[2]
 
-    folder_name = "content-provider"
+    folder_name = "/home/labuser/Desktop/content-provider"
     if not os.path.exists(folder_name):
         os.makedirs(folder_name)
 
