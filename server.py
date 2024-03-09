@@ -32,7 +32,7 @@ def handle_client_request(client_socket, file_name, server_info):
             client_socket.send(file_content_with_info.encode())
     except FileNotFoundError:
         print(
-            f"Failed to retrieve file from current node {system_ip}:{system_port}: {e}")
+            f"Failed to retrieve file from current node")
         # Forward the file request to other systems if not found locally
         current_system_ip = socket.gethostbyname(socket.gethostname())
         for system_ip, system_port in other_systems:
