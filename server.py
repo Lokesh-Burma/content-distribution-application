@@ -51,8 +51,12 @@ def handle_client_request(client_socket, file_name, server_info):
                     file_content = other_server_socket.recv(1024).decode()
                     file_content_with_info = f"File content received from server: {system_ip}:\n{system_port}"
                     client_socket.send(file_content_with_info.encode())
+                    print(
+                        f"File content received from the node: {system_ip}:{system_port}")
                     # Save the file received from other system locally
                     save_file(file_path, file_content)
+                    print(
+                        f"File saved locally: {file_path}")
                     other_server_socket.close()
                     return
                 except Exception as e:
