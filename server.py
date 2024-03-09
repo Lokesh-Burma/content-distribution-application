@@ -49,7 +49,7 @@ def handle_client_request(client_socket, file_name, server_info):
                     print(
                         f"Initiating search on the node: {system_ip}:{system_port}")
                     file_content = other_server_socket.recv(1024).decode()
-                    file_content_with_info = f"File content received from server: {server_info}:\n{file_content}"
+                    file_content_with_info = f"File content received from server: {system_ip}:\n{system_port}"
                     client_socket.send(file_content_with_info.encode())
                     # Save the file received from other system locally
                     save_file(file_path, file_content)
