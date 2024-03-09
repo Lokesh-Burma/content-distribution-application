@@ -56,7 +56,7 @@ def handle_client_request(client_socket, file_name, server_info):
 
 # Example usage:
 if __name__ == "__main__":
-    host = 'localhost'
+    host = socket.gethostbyname(socket.gethostname())
     port = 12345
 
     server_info = f"{host}:{port}"  # Server information for identification
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((host, port))
     server_socket.listen(1)
-    print("Server listening on port", port)
+    print("Server listening on ", host, port)
 
     while True:
         client_socket, client_address = server_socket.accept()
