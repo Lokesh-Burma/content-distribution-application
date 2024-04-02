@@ -8,6 +8,7 @@ locally and returns the content to the client.
 import os
 import socket
 import json
+import threading
 
 other_systems = [
     ("172.31.7.185", 12345),
@@ -21,7 +22,7 @@ def save_file(file_name, file_content):
         file.write(file_content)
 
 
-def handle_client_request(client_socket, data, current_system_ip):
+def handle_client(client_socket, data, current_system_ip):
     folder_name = "/home/labuser/Desktop/content-provider"
     file_path = os.path.join(folder_name, data['file_name'])
 
@@ -30,7 +31,7 @@ def handle_client_request(client_socket, data, current_system_ip):
             file_content = file.read()
             client_socket.send(
                 f"File content from server {current_system_ip}:\n{file_content}".encode())
-            return  # Exit the function after sending the file content
+            return
     except FileNotFoundError:
         print(f"Failed to retrieve file from current node")
 
@@ -70,13 +71,13 @@ def handle_client_request(client_socket, data, current_system_ip):
         client_socket.send("File not found.".encode())
 
 
-if __name__ == "__main__":
+def main():
     host = socket.gethostbyname(socket.gethostname())
     port = 12345
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((host, port))
-    server_socket.listen(1)
+    server_socket.listen(5)
     print("Server listening on: ", host, port)
 
     while True:
@@ -86,6 +87,11 @@ if __name__ == "__main__":
         data = client_socket.recv(1024).decode()
         data = json.loads(data)
         print("Received :", data)
-        handle_client_request(client_socket, data, host)
 
-        client_socket.close()
+        thread = threading.Thread(target=handle_client, args=(
+            client_socket, data, host))
+        thread.start()
+
+
+if __name__ == "__main__":
+    main()
